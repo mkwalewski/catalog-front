@@ -26,14 +26,14 @@
     // @ is an alias to /src
     //import HelloWorld from '@/components/HelloWorld.vue'
     import AddCatalog from '@/components/AddCatalog.vue'
-    import VJstree from 'vue-jstree';
+    //import VJstree from 'vue-jstree';
 
     export default {
         name: 'home',
         components: {
             //HelloWorld,
             AddCatalog,
-            VJstree
+            //VJstree
         },
         data: function () {
             return {

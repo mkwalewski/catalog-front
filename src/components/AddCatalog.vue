@@ -55,7 +55,7 @@
                     <div class="modal-footer">
                         <template v-if="isProcesing">
                             <div class="text-center">
-                                <button type="button" class="btn btn-danger">
+                                <button type="button" class="btn btn-danger" @click="stopProcessing">
                                     Anuluj
                                 </button>
                             </div>
@@ -77,14 +77,22 @@
 
 <script>
     //@item-toggle="jstreeToggle" @item-click="jstreeClick"
-    let SERVER = 'http://127.0.0.1:8001';
+    let SERVER = 'http://127.0.0.1:8000';
 
     import Vue from 'vue'
     import axios from 'axios';
     import VueAxios from 'vue-axios';
     import VJstree from 'vue-jstree';
+    import Toastr from 'vue-toastr';
 
     Vue.use(VueAxios, axios);
+    Vue.use(Toastr, {
+        defaultTimeout: 2500,
+        defaultProgressBar: false,
+        defaultProgressBarValue: 0,
+        defaultPosition: "toast-top-full-width",
+        defaultCloseOnHover: false
+    });
 
     export default {
         name: 'AddCatalog',
@@ -207,6 +215,21 @@
                     });
                 }
             },
+            stopProcessing: function (){
+                let self = this;
+                let data = {
+                    'catalog_disk_id': this.catalogDiskId
+                };
+                this.$http.post(SERVER + '/cancel_add_catalog_file', data).then(() => {
+                    //@TODO
+                    self.catalogDiskId = 0;
+                    self.currentItem = 0;
+                    self.currentFileName = '';
+                    self.items = [];
+                    self.maxItems = 0;
+                    self.isProcesing = false;
+                });
+            },
             processItem: function () {
                 let self = this;
                 if (this.items.length > 0)
@@ -219,10 +242,31 @@
                         'path': path
                     };
                     this.$http.post(SERVER + '/add_catalog_file', data).then((response) => {
-                        if (response.data)
+                        if (response.data.alerts)
+                        {
+                            for (let type in response.data.alerts)
+                            {
+                                let messages = response.data.alerts[type];
+                                for (let i in messages)
+                                {
+                                    let text = messages[i];
+                                    switch (type)
+                                    {
+                                        case 'success':
+                                            self.$toastr.s(text);
+                                            break;
+                                        case 'error':
+                                            self.$toastr.e(text);
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                        self.processItem();
+                        /*if (response.data)
                         {
                             self.files.push(response.data);
-                        }
+                        }*/
                         //self.processItem();
                     });
                 }
