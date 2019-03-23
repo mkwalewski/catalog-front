@@ -1,6 +1,40 @@
 <template>
     <div>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-sample">Dodaj</button>
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add-group">Dodaj grupę</button>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-sample" :disabled="!groups.length">Dodaj katalog</button>
+        </div>
+
+        <div class="modal" id="add-group"
+             tabindex="-1" role="dialog"
+             aria-labelledby="add-group-label" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="add-group-label">
+                            Dodaj grupę
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="col-sm-4 p-xxxs">
+                            <label for="groupName">Nazwa</label>
+                        </div>
+                        <div class="col-sm-20">
+                            <input type="text" class="form-control" id="groupName" v-model="groupName" placeholder="Wpisz nazwę">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" @click="addGroup" :disabled="!groupName">
+                            Zapisz
+                        </button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">
+                            Zamknij
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="modal" id="modal-sample"
              tabindex="-1" role="dialog"
              aria-labelledby="modal-sample-label" aria-hidden="true">
@@ -22,23 +56,33 @@
                                     <div class="progress-circle"></div>
                                 </div>
                                 <div class="clearfix"></div>
-                                <div v-if="items.length > 0">
-                                    <div>
-                                        Plik <b>{{ currentItem }}</b> z <b>{{ maxItems }}</b> ({{ currentProgress }}%)
-                                    </div>
-                                    <div>
-                                        {{ currentFileName }}
-                                    </div>
+                                <div>
+                                    Plik <b>{{ currentItem }}</b> z <b>{{ maxItems }}</b> ({{ currentProgress }}%)
+                                </div>
+                                <div>
+                                    {{ currentFileName }}
                                 </div>
                             </div>
                         </template>
                         <template v-else>
+                            <div class="col-sm-4 p-xxxs">
+                                <label for="selectGroups">Grupa</label>
+                            </div>
+                            <div class="col-sm-20">
+                                <select class="form-control" id="selectGroups"  v-model="groupId">
+                                    <option :value="0" disabled>Wybierz:</option>
+                                    <option :value="grupa.id" v-for="grupa in groups" :key="grupa.id">{{ grupa.name }}</option>
+                                </select>
+                            </div>
+                            <div class="clearfix"></div>
+
                             <div class="col-sm-4 p-xxxs">
                                 <label for="inputName">Nazwa</label>
                             </div>
                             <div class="col-sm-20">
                                 <input type="text" class="form-control" id="inputName" v-model="catalogName" placeholder="Wpisz nazwę">
                             </div>
+
                             <div class="clearfix"></div>
                             <div class="col-sm-4 p-xxxs">
                                 <label for="inputCatalog">Katalog</label>
@@ -47,6 +91,18 @@
                                 <input type="text" class="form-control" id="inputCatalog" v-model="catalogDisk" readonly>
                                 <div class="tree-catalog line color-line-neutral-mid color-bg-light-vivid-hig">
                                     <v-jstree :data="jstree" @item-click="jstreeClick" @item-toggle="jstreeToggle" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4 p-xxxs">
+                                <label for="checkboxRecursively">Rekursyw.</label>
+                            </div>
+                            <div class="col-sm-20">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="checkboxRecursively" v-model="catalogRecursively" />
+                                        <span></span>
+                                    </label>
                                 </div>
                             </div>
                             <div class="clearfix"></div>
@@ -61,7 +117,7 @@
                             </div>
                         </template>
                         <template v-else>
-                            <button type="button" class="btn btn-primary" @click="addCatalog" :disabled="!catalogName">
+                            <button type="button" class="btn btn-primary" @click="addCatalog" :disabled="!groupId || !catalogName || !catalogDisk">
                                 Zapisz
                             </button>
                             <button type="button" class="btn btn-info" data-dismiss="modal">
@@ -105,10 +161,13 @@
         data: function() {
             return {
                 isProcesing: false,
+                groupId: 0,
                 jstree: [],
+                groupName: '',
                 catalogName: '',
                 catalogDisk: '',
                 catalogDiskId: 0,
+                catalogRecursively: true,
                 currentItem: 0,
                 currentFileName: '',
                 items: [],
@@ -148,14 +207,49 @@
         },
         created: function() {
             this.SERVER = SERVER;
+            this.getGroups();
             this.getTree();
         },
         computed: {
+            groups: function () {
+                return this.$store.state.groups
+            },
             currentProgress: function() {
                 return parseInt(this.currentItem  * 100 / this.maxItems);
             }
         },
         methods: {
+            showAlerts: function (alerts) {
+                for (let type in alerts)
+                {
+                    let messages = alerts[type];
+                    for (let i in messages)
+                    {
+                        let text = messages[i];
+                        switch (type)
+                        {
+                            case 'success':
+                                this.$toastr.s(text);
+                                break;
+                            case 'error':
+                                this.$toastr.e(text);
+                                break;
+                        }
+                    }
+                }
+            },
+            getGroups: function () {
+                let self = this;
+                this.$http.get(SERVER + '/get_list_of_groups').then((response) => {
+                    let groups = [];
+                    for (let i = 0; i < response.data.length; i++)
+                    {
+                        let item = response.data[i];
+                        groups.push(item);
+                    }
+                    self.$store.commit('setGroups', groups);
+                });
+            },
             getTree: function() {
                 let self = this;
                 this.$http.get(SERVER + '/get_list_of_partitions').then((response) => {
@@ -244,30 +338,9 @@
                     this.$http.post(SERVER + '/add_catalog_file', data).then((response) => {
                         if (response.data.alerts)
                         {
-                            for (let type in response.data.alerts)
-                            {
-                                let messages = response.data.alerts[type];
-                                for (let i in messages)
-                                {
-                                    let text = messages[i];
-                                    switch (type)
-                                    {
-                                        case 'success':
-                                            self.$toastr.s(text);
-                                            break;
-                                        case 'error':
-                                            self.$toastr.e(text);
-                                            break;
-                                    }
-                                }
-                            }
+                            this.showAlerts(response.data.alerts);
                         }
                         self.processItem();
-                        /*if (response.data)
-                        {
-                            self.files.push(response.data);
-                        }*/
-                        //self.processItem();
                     });
                 }
                 else
@@ -278,8 +351,10 @@
             addCatalog: function () {
                 let self = this;
                 let data = {
+                    'group_id': this.groupId,
                     'name': this.catalogName,
-                    'path': this.catalogDisk
+                    'path': this.catalogDisk,
+                    'recursively': this.catalogRecursively,
                 };
                 this.$http.post(SERVER + '/add_catalog', data).then((response) => {
                     self.catalogDiskId = response.data.id;
@@ -290,6 +365,18 @@
                     self.isProcesing = true;
                     self.processItem();
                 });
+            },
+            addGroup: function () {
+                let data = {
+                    'name': this.groupName
+                };
+                this.$http.post(SERVER + '/add_group', data).then((response) => {
+                    if (response.data.alerts)
+                    {
+                        this.showAlerts(response.data.alerts);
+                    }
+                    this.getGroups();
+                });
             }
         }
     }
@@ -297,6 +384,15 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+    button {
+        min-width: 75px;
+    }
+    .btn-group {
+        margin: 0 !important;
+    }
+    .checkbox {
+        margin: -8px 0;
+    }
     #inputCatalog:focus {
         border-color: rgba(0,0,0,.6);
         background-color: rgba(0,0,0,.1);

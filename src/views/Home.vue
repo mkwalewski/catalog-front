@@ -14,9 +14,9 @@
 
           </div>
           <div role="tabpanel" class="tab-pane" id="catalogs">
-              <add-catalog />
+              <catalog-buttons />
+              <catalog-tree />
           </div>
-
       </div>
     </div>
   </div>
@@ -24,16 +24,14 @@
 
 <script>
     // @ is an alias to /src
-    //import HelloWorld from '@/components/HelloWorld.vue'
-    import AddCatalog from '@/components/AddCatalog.vue'
-    //import VJstree from 'vue-jstree';
+    import CatalogButtons from '@/components/CatalogButtons.vue'
+    import CatalogTree from '@/components/CatalogTree.vue'
 
     export default {
         name: 'home',
         components: {
-            //HelloWorld,
-            AddCatalog,
-            //VJstree
+            CatalogButtons,
+            CatalogTree
         },
         data: function () {
             return {
