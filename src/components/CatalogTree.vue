@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <v-jstree :data="catalogTree" @item-toggle="catalogTreeToggle"  />
+    <div class="catalog-tree m-xxxs color-bg-light-vivid-high">
+        <v-jstree :data="catalogTree" @item-toggle="catalogTreeToggle" @item-click="catalogTreeClick" />
     </div>
 </template>
 
@@ -24,7 +24,7 @@
     });
 
     export default {
-        name: 'AddGroup',
+        name: 'CatalogTree',
         components: {
             VJstree
         },
@@ -82,19 +82,42 @@
                     item['children'] = response.data;
                 });
             },
+            getFilesByDiskId: function (item) {
+                let self = this;
+                let data = {
+                    disk_id: item['value']
+                };
+                this.$store.commit('setFiles', []);
+                this.$store.commit('setFilesIsLoading', true);
+                this.$http.post(SERVER + '/get_catalog_files', data).then((response) => {
+                    self.$store.commit('setFiles', response.data);
+                    self.$store.commit('setFilesIsLoading', false);
+                });
+            },
             catalogTreeToggle: function (node, item) {
-                if (item['children'][0]['isLoading'] === true)
+                if ("children" in item && 0 in item['children'])
                 {
-                    item['children'][0]['isLoading'] = false;
-                    switch (item['type'])
+                    if (item['children'][0]['isLoading'] === true)
                     {
-                        case 'group':
-                            this.getDisk(item);
-                            break;
-                        case 'disk':
-                            this.getFolders(item);
-                            break;
+                        item['children'][0]['isLoading'] = false;
+                        switch (item['type'])
+                        {
+                            case 'group':
+                                this.getDisk(item);
+                                break;
+                            case 'disk':
+                                this.getFolders(item);
+                                break;
+                        }
                     }
+                }
+            },
+            catalogTreeClick: function (node, item) {
+                switch (item['type'])
+                {
+                    case 'disk':
+                        this.getFilesByDiskId(item);
+                        break;
                 }
             }
         }
@@ -103,5 +126,8 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-
+    .catalog-tree {
+        padding: 0 10px 10px 10px;
+        border: 2px solid rgba(0,0,0,.3);
+    }
 </style>

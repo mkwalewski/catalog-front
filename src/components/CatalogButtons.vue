@@ -89,7 +89,7 @@
                             </div>
                             <div class="col-sm-20">
                                 <input type="text" class="form-control" id="inputCatalog" v-model="catalogDisk" readonly>
-                                <div class="tree-catalog line color-line-neutral-mid color-bg-light-vivid-hig">
+                                <div class="tree-catalog color-bg-light-vivid-hig">
                                     <v-jstree :data="jstree" @item-click="jstreeClick" @item-toggle="jstreeToggle" />
                                 </div>
                             </div>
@@ -401,5 +401,7 @@
         height: 300px;
         overflow-x: hidden;
         overflow-y: scroll;
+        padding: 0 10px 10px 10px;
+        border: 2px solid rgba(0,0,0,.3);
     }
 </style>

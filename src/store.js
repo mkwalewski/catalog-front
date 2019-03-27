@@ -5,6 +5,8 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
     state: {
+        files: [],
+        filesIsLoading: false,
         groups: [],
         catalogTree: [],
     },
@@ -36,7 +38,13 @@ export default new Vuex.Store({
                     ]
                 });
             }
-        }
+        },
+        setFiles(state, payload) {
+            state.files = payload;
+        },
+        setFilesIsLoading(state, payload) {
+            state.filesIsLoading = payload;
+        },
     },
     actions: {
 

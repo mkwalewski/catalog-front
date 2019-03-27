@@ -19,6 +19,9 @@
           </div>
       </div>
     </div>
+      <div class="col-md-19 col-md-offset-1 panel-right color-bg-light-vivid-mid">
+          <catalog-files />
+      </div>
   </div>
 </template>
 
@@ -26,12 +29,14 @@
     // @ is an alias to /src
     import CatalogButtons from '@/components/CatalogButtons.vue'
     import CatalogTree from '@/components/CatalogTree.vue'
+    import CatalogFiles from '@/components/CatalogFiles.vue'
 
     export default {
         name: 'home',
         components: {
             CatalogButtons,
-            CatalogTree
+            CatalogTree,
+            CatalogFiles
         },
         data: function () {
             return {
@@ -44,5 +49,9 @@
 <style lang="scss">
   .panel-left {
     border: 1px solid rgba(0,0,0,.3);
+  }
+  .panel-right {
+      min-height: 100px !important;
+      border: 1px solid rgba(0,0,0,.3);
   }
 </style>
