@@ -6,14 +6,14 @@
     -->
     <div class="col-md-4 panel-left color-bg-light-vivid-mid">
       <ul class="nav nav-tabs theme-alt color-fill-accent-vivid-mid1 color-bg-dark-neutral-mid" role="tablist">
-        <li role="presentation" class="active"><a href="#disks" aria-controls="disks" role="tab" data-toggle="tab">Dyski</a></li>
-        <li role="presentation"><a href="#catalogs" aria-controls="catalogs" role="tab" data-toggle="tab">Katalogi</a></li>
+        <!--<li role="presentation" class="active"><a href="#disks" aria-controls="disks" role="tab" data-toggle="tab">Dyski</a></li>-->
+        <li role="presentation" class="active"><a href="#catalogs" aria-controls="catalogs" role="tab" data-toggle="tab">Katalogi</a></li>
       </ul>
       <div class="tab-content">
-          <div role="tabpanel" class="tab-pane active" id="disks">
+          <!--<div role="tabpanel" class="tab-pane active" id="disks">
 
-          </div>
-          <div role="tabpanel" class="tab-pane" id="catalogs">
+          </div>-->
+          <div role="tabpanel" class="tab-pane active" id="catalogs">
               <catalog-buttons />
               <catalog-tree />
           </div>
@@ -49,6 +49,7 @@
 <style lang="scss">
   .panel-left {
     border: 1px solid rgba(0,0,0,.3);
+      padding-bottom: 15px;
   }
   .panel-right {
       min-height: 100px !important;

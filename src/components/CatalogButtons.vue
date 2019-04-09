@@ -27,7 +27,7 @@
                         <button type="button" class="btn btn-primary" @click="addGroup" :disabled="!groupName">
                             Zapisz
                         </button>
-                        <button type="button" class="btn btn-info" data-dismiss="modal">
+                        <button type="button" class="btn btn-info" data-dismiss="modal" ref="addGroupClose">
                             Zamknij
                         </button>
                     </div>
@@ -220,6 +220,7 @@
         },
         methods: {
             showAlerts: function (alerts) {
+                let success = false;
                 for (let type in alerts)
                 {
                     let messages = alerts[type];
@@ -229,6 +230,7 @@
                         switch (type)
                         {
                             case 'success':
+                                success = true;
                                 this.$toastr.s(text);
                                 break;
                             case 'error':
@@ -237,6 +239,7 @@
                         }
                     }
                 }
+                return success;
             },
             getGroups: function () {
                 let self = this;
@@ -367,13 +370,17 @@
                 });
             },
             addGroup: function () {
+                let self = this;
                 let data = {
                     'name': this.groupName
                 };
                 this.$http.post(SERVER + '/add_group', data).then((response) => {
                     if (response.data.alerts)
                     {
-                        this.showAlerts(response.data.alerts);
+                        if (this.showAlerts(response.data.alerts))
+                        {
+                            self.$refs.addGroupClose.click();
+                        }
                     }
                     this.getGroups();
                 });

@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import _ from 'lodash';
 
 Vue.use(Vuex)
 
@@ -41,6 +42,10 @@ export default new Vuex.Store({
         },
         setFiles(state, payload) {
             state.files = payload;
+        },
+        updateFiles(state, payload) {
+            let index = _.findIndex(state.files, ['id', payload.id]);
+            state.files[index][payload.name] = payload.value;
         },
         setFilesIsLoading(state, payload) {
             state.filesIsLoading = payload;

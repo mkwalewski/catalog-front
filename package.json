@@ -10,11 +10,13 @@
   "dependencies": {
     "axios": "^0.18.0",
     "font-awesome": "^4.7.0",
+    "lodash": "^4.17.11",
     "v-img": "^0.2.0",
     "vue": "^2.6.6",
     "vue-axios": "^2.1.4",
     "vue-jstree": "^2.1.6",
     "vue-router": "^3.0.1",
+    "vue-sweetalert2": "^1.6.4",
     "vue-toastr": "^2.0.16",
     "vuex": "^3.0.1",
     "winstrap": "^0.5.12"
