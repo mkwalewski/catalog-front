@@ -124,6 +124,7 @@
                                 Zamknij
                             </button>
                         </template>
+                        <button type="button" class="hidden" data-dismiss="modal" ref="addCatalogClose"></button>
                     </div>
                 </div>
             </div>
@@ -167,11 +168,12 @@
                 catalogName: '',
                 catalogDisk: '',
                 catalogDiskId: 0,
-                catalogRecursively: true,
+                catalogRecursively: false,
                 currentItem: 0,
                 currentFileName: '',
                 items: [],
                 maxItems: 0,
+                processItemError: false
 
                 /*
                 scanFolderData: {
@@ -237,6 +239,19 @@
                                 this.$toastr.e(text);
                                 break;
                         }
+                    }
+                }
+                return success;
+            },
+            checkAlerts: function (alerts) {
+                let success = false;
+                for (let type in alerts)
+                {
+                    switch (type)
+                    {
+                        case 'success':
+                            success = true;
+                            break;
                     }
                 }
                 return success;
@@ -341,7 +356,10 @@
                     this.$http.post(SERVER + '/add_catalog_file', data).then((response) => {
                         if (response.data.alerts)
                         {
-                            this.showAlerts(response.data.alerts);
+                            if (!self.checkAlerts(response.data.alerts))
+                            {
+                                self.processItemError = true;
+                            }
                         }
                         self.processItem();
                     });
@@ -349,7 +367,26 @@
                 else
                 {
                     this.isProcesing = false;
+                    this.$store.dispatch('refreshDiskForGroup', {id: this.groupId});
+                    this.resetAddCatalogProccess();
+                    this.$refs.addCatalogClose.click();
+                    if (this.processItemError)
+                    {
+                        this.$toastr.e('Błąd przy dodawaniu katalogu');
+                    }
+                    else
+                    {
+                        this.$toastr.s('Pomyślnie dodano katalog');
+                    }
                 }
+            },
+            resetAddCatalogProccess: function () {
+                this.groupId = 0;
+                this.groupName = '';
+                this.catalogName = '';
+                this.catalogDisk = '';
+                this.catalogDiskId = 0;
+                this.catalogRecursively = false;
             },
             addCatalog: function () {
                 let self = this;
@@ -365,6 +402,7 @@
                     self.currentFileName = '';
                     self.items = response.data.files;
                     self.maxItems = response.data.files.length;
+                    self.processItemError = false;
                     self.isProcesing = true;
                     self.processItem();
                 });
@@ -377,12 +415,13 @@
                 this.$http.post(SERVER + '/add_group', data).then((response) => {
                     if (response.data.alerts)
                     {
-                        if (this.showAlerts(response.data.alerts))
+                        if (self.showAlerts(response.data.alerts))
                         {
+                            self.groupName = '';
                             self.$refs.addGroupClose.click();
+                            self.getGroups();
                         }
                     }
-                    this.getGroups();
                 });
             }
         }

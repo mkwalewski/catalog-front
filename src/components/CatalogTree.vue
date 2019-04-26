@@ -159,6 +159,7 @@
                 }
             },
             catalogTreeEdit: function (node, item){
+                let self = this;
                 let swalTitle = null;
                 switch (item['type'])
                 {
@@ -190,7 +191,16 @@
                                 {
                                     if (this.showAlerts(response.data.alerts))
                                     {
-                                        item['text'] = result.value;
+                                        //item['text'] = result.value;
+                                        switch (item['type'])
+                                        {
+                                            case 'group':
+                                                self.$store.commit('updateGroup', {id: item.value, name: result.value});
+                                                break;
+                                            case 'disk':
+                                                self.$store.commit('updateDisk', {id: item.value, name: result.value});
+                                                break;
+                                        }
                                     }
                                 }
                             });
@@ -199,13 +209,19 @@
                 }
             },
             catalogTreeDelete: function (node, item) {
+                let self = this;
                 let swalTitle = null;
                 switch (item['type'])
                 {
                     case 'group':
-                        swalTitle = 'Usuń nazwę grupy';
+                        swalTitle = 'Usuń grupę';
+                        break;
+                    case 'disk':
+                        swalTitle = 'Usuń katalog';
                         break;
                 }
+                //console.log(node);
+                //console.log(item);
                 if (swalTitle)
                 {
                     this.$swal({
@@ -218,7 +234,30 @@
                     }).then((result) => {
                         if (result.value)
                         {
-                           alert('test');
+                            let data = {
+                                id: item.value
+                            };
+                            this.$http.post(SERVER + '/delete_' + item['type'], data).then((response) => {
+                                switch (item['type'])
+                                {
+                                    case 'group':
+                                        self.$store.commit('deleteGroup', {value: item.value});
+                                        break;
+                                    case 'disk':
+                                        self.$store.commit('deleteDisk', {value: item.value});
+                                        break;
+                                }
+                                if (response.data.alerts)
+                                {
+                                    if (this.showAlerts(response.data.alerts))
+                                    {
+
+                                        //@TODO - remove item
+                                        //item = [];
+
+                                    }
+                                }
+                            });
                         }
                     });
                 }

@@ -63,14 +63,17 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
+
                         <th class="text-center">Lp.</th>
                         <th class="text-center">Typ</th>
+                        <th></th>
                         <th class="text-center">Miniaturka</th>
                         <th class="text-left">Plik</th>
                         <th class="text-center">Rozszerzenie</th>
                         <th class="text-center">Rozmiar</th>
                         <th class="text-center">Długość</th>
                         <th class="text-center">Rozdzielczość</th>
+                        <th></th>
                         <th class="text-center">Akcja</th>
                     </tr>
                 </thead>
@@ -81,6 +84,11 @@
                         </td>
                         <td class="file-type">
                             {{ file.type }}
+                        </td>
+                        <td class="action-buttons">
+                            <button type="button" class="btn btn-link" @click="openFile(file.id)">
+                                <span class="type-t4 glyph glyph-play" aria-hidden="true"></span>
+                            </button>
                         </td>
                         <td>
                             <template v-if="file.image">
@@ -109,7 +117,7 @@
                                 {{ file.videoWidth }}x{{ file.videoHeight }}
                             </template>
                         </td>
-                        <td class="action-buttons text-right">
+                        <td class="action-buttons">
                             <button type="button" class="btn btn-link" @click="toggleFavorite(file.id)">
                                 <template v-if="file.favorite">
                                     <span class="type-t4 glyph glyph-star" aria-hidden="true"></span>
@@ -118,7 +126,8 @@
                                     <span class="type-t4 glyph glyph-star-outline" aria-hidden="true"></span>
                                 </template>
                             </button>
-
+                        </td>
+                        <td class="action-buttons text-right">
                             <button type="button" class="btn btn-primary" @click="openFolder(file.id)">
                                 <span class="glyph glyph-folder-horizontal-open" aria-hidden="true"></span>
                             </button>
@@ -127,7 +136,7 @@
                                 <span class="glyph glyph-info" aria-hidden="true"></span>
                             </button>
 
-                            <button type="button" class="btn btn-danger delete-file">
+                            <button type="button" class="btn btn-danger delete-file" @click="deleteFile(file.id)">
                                 <span class="glyph glyph-delete" aria-hidden="true"></span>
                             </button>
 
@@ -367,6 +376,14 @@
                     }
                 });
             },
+            openFile: function (id) {
+                let data = {
+                    'id': id
+                };
+                this.$http.post(SERVER + '/open_file', data).then(() => {
+
+                });
+            },
             openFolder: function (id) {
                 let data = {
                     'id': id
@@ -374,13 +391,46 @@
                 this.$http.post(SERVER + '/open_folder', data).then(() => {
 
                 });
-            }
+            },
+            deleteFile: function (id) {
+                let self = this;
+                this.$swal({
+                    title: 'Czy na pewno chcesz usunąć ?',
+                    type: 'warning',
+                    input: 'checkbox',
+                    inputPlaceholder: 'Usuń również plik z dysku',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'Tak - usuń',
+                    cancelButtonText: 'Nie'
+                }).then((result) => {
+                    if (result.value === 0 || result.value === 1)
+                    {
+                        let data = {
+                            'id': id,
+                            'delete': result.value
+                        };
+                        this.$http.post(SERVER + '/delete_file', data).then((response) => {
+                            if (response.data.alerts)
+                            {
+                                if (this.showAlerts(response.data.alerts))
+                                {
+                                    self.$store.commit('deleteFile', {id: id});
+                                }
+                            }
+                        });
+                    }
+                })
+            },
         }
     }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+    td {
+        vertical-align: middle !important;
+    }
     .file-type:first-letter {
         text-transform: capitalize;
     }
