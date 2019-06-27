@@ -106,6 +106,19 @@
                                 </div>
                             </div>
                             <div class="clearfix"></div>
+
+                            <div class="col-sm-4 p-xxxs">
+                                <label for="checkboxThumbs">Miniaturki</label>
+                            </div>
+                            <div class="col-sm-20">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="checkboxThumbs" v-model="catalogThumbs" />
+                                        <span></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
                         </template>
                     </div>
                     <div class="modal-footer">
@@ -169,6 +182,7 @@
                 catalogDisk: '',
                 catalogDiskId: 0,
                 catalogRecursively: false,
+                catalogThumbs: false,
                 currentItem: 0,
                 currentFileName: '',
                 items: [],
@@ -351,7 +365,8 @@
                     this.currentFileName = path;
                     let data = {
                         'catalog_disk_id': this.catalogDiskId,
-                        'path': path
+                        'path': path,
+                        'thumbs': this.catalogThumbs,
                     };
                     this.$http.post(SERVER + '/add_catalog_file', data).then((response) => {
                         if (response.data.alerts)
