@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+      <!--
     <div class="page-header">
       <div class="container">
         <div class="row">
@@ -13,6 +14,7 @@
         </div>
       </div>
     </div>
+      -->
     <!--
     <div id="nav2">
       <router-link to="/">Home</router-link> |

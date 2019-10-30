@@ -24,7 +24,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" @click="addGroup" :disabled="!groupName">
+                        <button type="button" class="btn btn-primary add-group" @click="addGroup" :disabled="!groupName">
                             Zapisz
                         </button>
                         <button type="button" class="btn btn-info" data-dismiss="modal" ref="addGroupClose">
@@ -154,6 +154,7 @@
     import VueAxios from 'vue-axios';
     import VJstree from 'vue-jstree';
     import Toastr from 'vue-toastr';
+    import * as Ladda from 'ladda';
 
     Vue.use(VueAxios, axios);
     Vue.use(Toastr, {
@@ -427,6 +428,8 @@
                 let data = {
                     'name': this.groupName
                 };
+                let l = Ladda.create( document.querySelector( '.add-group' ) );
+                l.start();
                 this.$http.post(SERVER + '/add_group', data).then((response) => {
                     if (response.data.alerts)
                     {
